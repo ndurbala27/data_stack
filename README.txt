@@ -129,3 +129,82 @@ Visit: http://localhost:8080 and log in
 Confirm containers are running: docker ps
 
 Test NiFi > MySQL connection from the GUI.
+
+
+
+You're absolutely right — and you’re now making the critical distinction between:
+
+A Dockerfile: Instructions to build a custom image.
+
+A Docker Compose file: Instructions to run containers, possibly using an image built from a Dockerfile.
+
+🧠 What’s Happening in Your Case
+You're using the official NiFi image, not building your own. That's fine — but the reason HTTP mode isn't working may be because the base image enforces HTTPS unless you fully configure it to avoid secure mode (and NiFi 2.x has tighter defaults).
+
+This is where a custom Dockerfile gives you more control.
+
+✅ Let's Pivot to a Clean, Custom Solution
+We'll now:
+
+Create a custom Dockerfile for NiFi that forces HTTP
+
+Use Docker Compose to build and run it
+
+📁 Step-by-Step Structure
+Your project will look like:
+
+data_stack/
+├── nifi/
+│   └── Dockerfile         👈 Our custom NiFi image
+├── docker-compose.yml     👈 Compose file that builds and runs NiFi
+
+🛠️ Step 1: Create the Dockerfile
+In a new folder nifi/, create Dockerfile:
+
+mkdir -p ~/docker-lab/data_stack/nifi
+nano ~/docker-lab/data_stack/nifi/Dockerfile
+
+Paste this:
+FROM apache/nifi:latest
+
+ENV NIFI_WEB_HTTP_PORT=8080
+ENV NIFI_WEB_HTTP_HOST=0.0.0.0
+ENV NIFI_WEB_HTTPS_PORT=
+ENV SINGLE_USER_CREDENTIALS_USERNAME=admin
+ENV SINGLE_USER_CREDENTIALS_PASSWORD=admin123
+
+🛠️ Step 2: Modify docker-compose.yml
+Update the nifi service like this:
+  
+  nifi:
+    build:
+      context: ./nifi
+    container_name: ingest
+    ports:
+      - "8080:8080"
+    volumes:
+      - /mnt/shared_vol/data:/mnt/shared
+    networks:
+      - nifi_net
+    restart: unless-stopped
+
+
+This tells Docker Compose:
+
+“Use the custom Dockerfile in ./nifi”
+
+“Expose port 8080”
+
+“Use mounted volumes and the shared network”
+
+
+🏁 Step 3: Rebuild and Run
+
+cd ~/docker-lab/data_stack
+docker compose down
+docker compose up -d --build
+
+
+Then open:
+
+http://localhost:8080/nifi
