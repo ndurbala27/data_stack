@@ -120,10 +120,8 @@ services:
 ✅ Step 4: Start Your Environment
 Run this from the directory with your docker-compose.yml:
 
-bash
-Copy
-Edit
 docker compose up -d
+
 Then check:
 
 Visit: http://localhost:8080 and log in
