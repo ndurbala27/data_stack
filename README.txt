@@ -121,6 +121,7 @@ services:
 Run this from the directory with your docker-compose.yml:
 
 docker compose up -d
+
 Then check:
 
 Visit: http://localhost:8080 and log in
