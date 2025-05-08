@@ -6,6 +6,10 @@ volumes:
   nifi_data:
   mysql_data:
 
+labels:
+  app: nifi
+  role: ingestion
+
 services:
   mysql:
     image: mysql:8
@@ -26,6 +30,12 @@ services:
   nifi:
     build:
       context: ./nifi
+    environment:
+      - NIFI_WEB_HTTP_PORT=8080
+      - NIFI_WEB_HTTP_HOST=0.0.0.0
+      - NIFI_WEB_HTTPS_PORT=
+      - SINGLE_USER_CREDENTIALS_USERNAME=admin
+      - SINGLE_USER_CREDENTIALS_PASSWORD=admin123
     container_name: ingest
     ports:
       - "8080:8080"
